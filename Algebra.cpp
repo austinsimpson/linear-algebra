@@ -36,4 +36,3 @@ QList<int> Factorize(int number)
 	return result;
 }
 
-

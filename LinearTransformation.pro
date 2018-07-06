@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets macextras
 
 TARGET = LinearTransformation
 TEMPLATE = app
@@ -30,7 +30,8 @@ SOURCES += \
     MatrixTableViewModel.cpp \
     TransformWidget.cpp \
     Algebra.cpp \
-    Fraction.cpp
+    Fraction.cpp \
+    ConvolutionalImageFilter.cpp
 
 HEADERS += \
         TransformationWindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     MatrixTableViewModel.h \
     TransformWidget.h \
     Algebra.h \
-    Fraction.h
+    Fraction.h \
+    ConvolutionalImageFilter.h
 
 FORMS += \
         TransformationWindow.ui

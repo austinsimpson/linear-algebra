@@ -2,15 +2,18 @@
 #define MATRIX_H
 
 #include <QObject>
+#include <QSharedPointer>
 
-class Matrix : public QObject
+class Matrix
 {
-    Q_OBJECT
 public:
-    explicit Matrix(QObject *parent = nullptr, int rowCount = 3, int columnCount = 3);
-	explicit Matrix(int rowCount, int columnCount);
-	Matrix* clone();
+	Matrix();
+	Matrix(int rowCount, int columnCount);
+	Matrix(const Matrix& other);
+
 	~Matrix();
+
+	Matrix& operator= (Matrix other);
 
     double getEntry(int row, int column) const;
     void setEntry(int row, int column, double value);
@@ -18,18 +21,19 @@ public:
     int rowCount() const;
     int columnCount() const;
 
-	bool isRref() const;
+	bool isReducedRowEchelonForm() const;
 
-	Matrix* multiply(const Matrix& other);
+	Matrix multiply(const Matrix& other);
 	void scale(double factor);
 
-	Matrix* transpose();
+	double convolve(const Matrix& other);
 
-    static Matrix* Identity(int size);
-    static Matrix* Zeroes(int rowCount, int columnCount);
+	Matrix transpose();
 
-	Matrix* ref();
-	Matrix* rref();
+	static Matrix Identity(int size);
+
+	Matrix rowEchelonForm();
+	Matrix reducedRowEchelonForm();
 
     QString toString();
 
@@ -45,7 +49,7 @@ private:
     int _rowCount;
     int _columnCount;
 
-    double* _values = nullptr;
+	QSharedPointer<double> _values;
 };
 
 #endif // MATRIX_H

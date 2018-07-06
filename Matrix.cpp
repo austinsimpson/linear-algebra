@@ -3,49 +3,49 @@
 #include <QStringBuilder>
 #include <math.h>
 
-Matrix::Matrix
-(
-    QObject* parent,
-    int rowCount,
-    int columnCount
-):
-    QObject(parent)
+Matrix::Matrix()
 {
-    _rowCount = rowCount;
-    _columnCount = columnCount;
-
-    _values = new double[rowCount * columnCount];
+	_values = nullptr;
+	_rowCount = 0;
+	_columnCount = 0;
 }
 
 Matrix::Matrix
 (
 	int rowCount,
-	int columnCount
-):
-	QObject(nullptr)
+    int columnCount
+)
 {
-	_rowCount = rowCount;
-	_columnCount = columnCount;
+	_values = nullptr;
 
-	_values = new double[rowCount * columnCount];
+	if (rowCount > 0 && columnCount > 0)
+	{
+		_rowCount = rowCount;
+		_columnCount = columnCount;
+
+		_values = QSharedPointer<double>(new double[rowCount * columnCount]);
+		memset(_values.data(), 0, sizeof(double) * _rowCount * _columnCount);
+	}
+}
+
+Matrix::Matrix(const Matrix& other)
+{
+	_rowCount = other.rowCount();
+	_columnCount = other.columnCount();
+	_values = other._values;
 }
 
 Matrix::~Matrix()
 {
-	delete _values;
 }
 
-Matrix* Matrix::clone()
+Matrix& Matrix::operator=(Matrix other)
 {
-	Matrix* result = new Matrix(rowCount(), columnCount());
-	for (int i = 0; i < rowCount(); i++)
-	{
-		for (int j = 0; j < columnCount(); j++)
-		{
-			result->setEntry(i, j, getEntry(i, j));
-		}
-	}
-	return result;
+	_rowCount = other.rowCount();
+	_columnCount = other.columnCount();
+	_values = other._values;
+
+	return *this;
 }
 
 double Matrix::getEntry(int row, int column) const
@@ -53,7 +53,7 @@ double Matrix::getEntry(int row, int column) const
 	double result = nan("");
 	if (row < rowCount() && column < columnCount())
 	{
-		result = _values[row * _columnCount + column];
+		result = _values.data()[row * _columnCount + column];
 	}
 	return result;
 }
@@ -62,7 +62,7 @@ void Matrix::setEntry(int row, int column, double value)
 {
 	if (row < rowCount() && column < columnCount())
 	{
-		_values[row * _columnCount + column] = value;
+		_values.data()[row * _columnCount + column] = value;
 	}
 }
 
@@ -76,17 +76,17 @@ int Matrix::columnCount() const
     return _columnCount;
 }
 
-bool Matrix::isRref() const
+bool Matrix::isReducedRowEchelonForm() const
 {
 	return false;
 }
 
-Matrix* Matrix::multiply(const Matrix& otherMatrix)
+Matrix Matrix::multiply(const Matrix& otherMatrix)
 {
-    Matrix* result = nullptr;
+	Matrix result = Matrix();
     if (columnCount() == otherMatrix.rowCount())
     {
-		result = new Matrix(rowCount(), otherMatrix.columnCount());
+		result = Matrix(rowCount(), otherMatrix.columnCount());
         for (int row = 0; row < rowCount(); row++)
         {
             for (int column = 0; column < otherMatrix.columnCount(); column++)
@@ -96,7 +96,7 @@ Matrix* Matrix::multiply(const Matrix& otherMatrix)
                 {
                     sum += (getEntry(row, r) * otherMatrix.getEntry(r, column));
                 }
-                result->setEntry(row, column, sum);
+				result.setEntry(row, column, sum);
             }
         }
     }
@@ -107,70 +107,58 @@ void Matrix::scale(double scalar)
 {
 	for (int i = 0; i < rowCount() * columnCount(); i++)
 	{
-		_values[i] *= scalar;
+		_values.data()[i] *= scalar;
 	}
 }
 
-Matrix* Matrix::transpose()
+Matrix Matrix::transpose()
 {
-	Matrix* result = new Matrix(nullptr, columnCount(), rowCount());
+	Matrix result = Matrix(columnCount(), rowCount());
 	for (int i = 0; i < rowCount(); i++)
 	{
 		for (int j = 0; j < columnCount(); j++)
 		{
-			result->setEntry(j, i, getEntry(i, j));
+			result.setEntry(j, i, getEntry(i, j));
 		}
 	}
 	return result;
 }
 
-Matrix* Matrix::Identity(int size)
+Matrix Matrix::Identity(int size)
 {
-    Matrix* matrix = Matrix::Zeroes(size, size);
+	Matrix matrix(size, size);
     for (int i = 0; i < size; i++)
     {
-        matrix->setEntry(i, i, 1);
+		matrix.setEntry(i, i, 1);
     }
     return matrix;
 }
 
-Matrix* Matrix::Zeroes(int rowCount, int columnCount)
+Matrix Matrix::rowEchelonForm()
 {
-    Matrix* matrix = new Matrix(nullptr, rowCount, columnCount);
-    for (int i = 0; i < rowCount; i++)
-    {
-        for (int j = 0; j < columnCount; j++)
-        {
-            matrix->setEntry(i, j, 0);
-        }
-    }
-    return matrix;
-}
-
-Matrix* Matrix::ref()
-{
-	Matrix* result = clone();
+	Matrix result = Matrix(*this);
 	int pivotI = 0;
 	int pivotJ = 0;
-	while (pivotI < result->rowCount() && pivotJ < result->columnCount())
+
+	while (pivotI < result.rowCount() && pivotJ < result.columnCount())
 	{
 		//First thing we do is find the pivot row of the matrix.
 		int rowIndex = pivotI;
-		while (result->getEntry(rowIndex, pivotJ) == 0 && rowIndex < result->rowCount())
+		while (result.getEntry(rowIndex, pivotJ) == 0 && rowIndex < result.rowCount())
 		{
 			rowIndex++;
 		}
 
-		if (rowIndex < result->rowCount())
+		if (rowIndex < result.rowCount())
 		{
-			result->swapRows(pivotI, rowIndex);
-			result->scaleRow(pivotI, (1.0 / result->getEntry(pivotI, pivotJ)));
+			result.swapRows(pivotI, rowIndex);
+			result.scaleRow(pivotI, (1.0 / result.getEntry(pivotI, pivotJ)));
 
-			for (rowIndex = pivotI + 1; rowIndex < result->rowCount(); rowIndex++)
+			for (rowIndex = pivotI + 1; rowIndex < result.rowCount(); rowIndex++)
 			{
-				if (result->getEntry(rowIndex, pivotJ) != 0)
+				if (result.getEntry(rowIndex, pivotJ) != 0)
 				{
-					result->pivot(pivotI, rowIndex, -(result->getEntry(rowIndex, pivotJ)));
+					result.pivot(pivotI, rowIndex, -(result.getEntry(rowIndex, pivotJ)));
 				}
 			}
 
@@ -182,9 +170,9 @@ Matrix* Matrix::ref()
 	return result;
 }
 
-Matrix* Matrix::rref()
+Matrix Matrix::reducedRowEchelonForm()
 {
-	Matrix* result = ref(); //We use ref as a starting point because rref is basically just more ref action
+	Matrix result = rowEchelonForm(); //We use ref as a starting point because rref is basically just more ref action
 	return result;
 }
 
@@ -216,6 +204,25 @@ void Matrix::scaleRow
 		}
 	}
 }
+
+double Matrix::convolve(const Matrix& other)
+{
+	Q_ASSERT (rowCount() == other.rowCount());
+	Q_ASSERT (columnCount() == other.columnCount());
+
+	double result = 0;
+
+	for (int i = 0; i < rowCount(); i++)
+	{
+		for (int j = 0; j < columnCount(); j++)
+		{
+			result += this->getEntry(i, j) * other.getEntry(i, j);
+		}
+	}
+
+	return result;
+}
+
 
 void Matrix::swapRows
 (
