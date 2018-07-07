@@ -207,9 +207,6 @@ void Matrix::scaleRow
 
 double Matrix::convolve(const Matrix& other)
 {
-	Q_ASSERT (rowCount() == other.rowCount());
-	Q_ASSERT (columnCount() == other.columnCount());
-
 	double result = 0;
 
 	for (int i = 0; i < rowCount(); i++)

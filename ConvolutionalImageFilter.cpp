@@ -2,6 +2,9 @@
 
 #include "Algebra.h"
 
+#include <QDebug>
+#include <math.h>
+
 ConvolutionalImageFilter::ConvolutionalImageFilter() : _shouldApplyGrayscale(false)
 {
 	_convolutionMatrix = Matrix::Identity(1);
@@ -51,7 +54,7 @@ QImage ConvolutionalImageFilter::apply(const QImage& image)
 	QImage result;
 	if (_shouldApplyGrayscale == false)
 	{
-		result = QImage(image.size(), image.format());
+		result = QImage(image.size(), QImage::Format_RGB888);
 	}
 	else
 	{
@@ -65,6 +68,8 @@ QImage ConvolutionalImageFilter::apply(const QImage& image)
 			result.setPixel(column, row, convolveImage(image, column, row));
 		}
 	}
+
+	result.save("/Users/AustinSimpson/Desktop/convolution.bmp");
 
 	return result;
 }
@@ -92,22 +97,29 @@ QRgb ConvolutionalImageFilter::convolveImage
 	{
 		for (int y = lowerRowBound; y <= upperRowBound; y++)
 		{
-			if (0 <= x && x < image.width() && 0 <= y && y < image.height())
-			{
-				QRgb currentPixel = image.pixel(x, y);
+			int usedX = x;
+			int usedY = y;
+			if (usedX < 0) usedX = 0;
+			if (usedX >= image.width()) usedX = image.width() - 1;
+			if (usedY < 0) usedY = 0;
+			if (usedY >= image.height()) usedY = image.height() - 1;
 
-				int matrixRowIndex = y - lowerRowBound;
-				int matrixColumnIndex = x - lowerColumnBound;
+			QRgb currentPixel = image.pixel(usedX, usedY);
 
-				redMatrix.setEntry(matrixRowIndex, matrixColumnIndex, qRed(currentPixel));
-				greenMatrix.setEntry(matrixRowIndex, matrixColumnIndex, qGreen(currentPixel));
-				blueMatrix.setEntry(matrixRowIndex, matrixColumnIndex, qBlue(currentPixel));
-			}
+			int matrixRowIndex = y - lowerRowBound;
+			int matrixColumnIndex = x - lowerColumnBound;
+
+			redMatrix.setEntry(matrixRowIndex, matrixColumnIndex, (double)qRed(currentPixel));
+			greenMatrix.setEntry(matrixRowIndex, matrixColumnIndex, (double)qGreen(currentPixel));
+			blueMatrix.setEntry(matrixRowIndex, matrixColumnIndex, (double)qBlue(currentPixel));
 		}
 	}
 
-	result = qRgb((quint8)_convolutionMatrix.convolve(redMatrix), (quint8)_convolutionMatrix.convolve(greenMatrix), (quint8)_convolutionMatrix.convolve(blueMatrix));
+	double redConvolution = fabs(_convolutionMatrix.convolve(redMatrix));
+	double greenConvolution = fabs(_convolutionMatrix.convolve(greenMatrix));
+	double blueConvolution = fabs(_convolutionMatrix.convolve(blueMatrix));
 
+	result = qRgb((int)(redConvolution), (int)(greenConvolution), (int)(blueConvolution));
 	return result;
 }
 
@@ -116,14 +128,13 @@ ConvolutionalImageFilter ConvolutionalImageFilter::horizontalSobel()
 	ConvolutionalImageFilter result;
 	result.setShouldApplyGrayscale(true);
 	Matrix convolutionalMatrix(3, 3);
-	convolutionalMatrix.setEntry(0, 0, -1);
-	convolutionalMatrix.setEntry(0, 1, -2);
-	convolutionalMatrix.setEntry(0, 2, -1);
+	convolutionalMatrix.setEntry(0, 0, 1);
+	convolutionalMatrix.setEntry(0, 1, 2);
+	convolutionalMatrix.setEntry(0, 2, 1);
 
-	convolutionalMatrix.setEntry(2, 0, 1);
-	convolutionalMatrix.setEntry(2, 1, 2);
-	convolutionalMatrix.setEntry(2, 2, 1);
-
+	convolutionalMatrix.setEntry(2, 0, -1);
+	convolutionalMatrix.setEntry(2, 1, -2);
+	convolutionalMatrix.setEntry(2, 2, -1);
 	result.setConvolutionMatrix(convolutionalMatrix);
 
 	return result;
@@ -145,39 +156,21 @@ ConvolutionalImageFilter ConvolutionalImageFilter::verticalSobel()
 	return result;
 }
 
-ConvolutionalImageFilter ConvolutionalImageFilter::gaussian()
+ConvolutionalImageFilter ConvolutionalImageFilter::gaussianFilter(double sigma)
 {
 	ConvolutionalImageFilter result;
-	Matrix convolutionalMatrix(5, 5);
-	convolutionalMatrix.setEntry(0, 0, 1.0);
-	convolutionalMatrix.setEntry(0, 1, 4.0);
-	convolutionalMatrix.setEntry(0, 2, 6.0);
-	convolutionalMatrix.setEntry(0, 3, 4.0);
-	convolutionalMatrix.setEntry(0, 4, 1.0);
+	int matDim = (int) ceil(6 * sigma);
+	if (matDim % 2 == 0) matDim++;
+	Matrix convolutionalMatrix(matDim, matDim);
 
-	convolutionalMatrix.setEntry(1, 0, 4.0);
-	convolutionalMatrix.setEntry(1, 1, 16.0);
-	convolutionalMatrix.setEntry(1, 2, 24.0);
-	convolutionalMatrix.setEntry(1, 3, 16.0);
-	convolutionalMatrix.setEntry(1, 4, 4.0);
+	for (int i = 0; i < convolutionalMatrix.rowCount(); i++)
+	{
+		for (int j = 0; j < convolutionalMatrix.columnCount(); j++)
+		{
+			convolutionalMatrix.setEntry(i, j, gaussian(sigma, i, j));
+		}
+	}
 
-	convolutionalMatrix.setEntry(2, 0, 6.0);
-	convolutionalMatrix.setEntry(2, 1, 24.0);
-	convolutionalMatrix.setEntry(2, 2, 36.0);
-	convolutionalMatrix.setEntry(2, 3, 24.0);
-	convolutionalMatrix.setEntry(2, 4, 6.0);
-
-	convolutionalMatrix.setEntry(3, 0, 4.0);
-	convolutionalMatrix.setEntry(3, 1, 16.0);
-	convolutionalMatrix.setEntry(3, 2, 24.0);
-	convolutionalMatrix.setEntry(3, 3, 16.0);
-	convolutionalMatrix.setEntry(3, 4, 4.0);
-
-	convolutionalMatrix.setEntry(4, 0, 1.0);
-	convolutionalMatrix.setEntry(4, 1, 4.0);
-	convolutionalMatrix.setEntry(4, 2, 6.0);
-	convolutionalMatrix.setEntry(4, 3, 4.0);
-	convolutionalMatrix.setEntry(4, 4, 1.0);
 	result.setConvolutionMatrix(convolutionalMatrix);
 	return result;
 }

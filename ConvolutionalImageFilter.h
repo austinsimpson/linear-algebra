@@ -22,7 +22,7 @@ public:
 	static ConvolutionalImageFilter verticalSobel();
 	static ConvolutionalImageFilter edgeDetector();
 
-	static ConvolutionalImageFilter gaussian();
+	static ConvolutionalImageFilter gaussianFilter(double sigma);
 
 private:
 	QRgb convolveImage(const QImage& image, int pixelX, int pixelY);
