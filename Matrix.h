@@ -4,6 +4,36 @@
 #include <QObject>
 #include <QSharedPointer>
 
+class MatrixData : public QSharedData
+{
+public:
+	MatrixData()
+	{
+		_rowCount = 0;
+		_columnCount = 0;
+	}
+
+	MatrixData(int rowCount, int columnCount)
+	{
+		int elementCount = rowCount * columnCount;
+		_matrixValues = new double[elementCount];
+		memset(_matrixValues, 0, sizeof(double) * elementCount);
+	}
+
+	~MatrixData()
+	{
+		if (_matrixValues != nullptr)
+		{
+			delete[] _matrixValues;
+		}
+	}
+
+private:
+	double* _matrixValues;
+	int _rowCount;
+	int _columnCount;
+};
+
 class Matrix
 {
 public:
@@ -14,6 +44,12 @@ public:
 	~Matrix();
 
 	Matrix& operator= (Matrix other);
+	bool operator == (const Matrix& other);
+	bool operator != (const Matrix& other);
+
+	Matrix operator+(const Matrix& other);
+	Matrix operator-(const Matrix& other);
+	Matrix operator*(const Matrix& other);
 
     double getEntry(int row, int column) const;
     void setEntry(int row, int column, double value);
@@ -32,7 +68,7 @@ public:
 
 	static Matrix Identity(int size);
 
-	Matrix rowEchelonForm();
+	Matrix rowEchelonForm() const;
 	Matrix reducedRowEchelonForm();
 
     QString toString();

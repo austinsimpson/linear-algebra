@@ -48,6 +48,47 @@ Matrix& Matrix::operator=(Matrix other)
 	return *this;
 }
 
+bool Matrix::operator ==(const Matrix& other)
+{
+	bool result = this->rowCount() == other.rowCount() && this->columnCount() == other.columnCount();
+
+	if (result)
+	{
+		for (int i = 0; i < this->rowCount() && result; i++)
+		{
+			for (int j = 0; j < this->columnCount() && result; j++)
+			{
+				result = getEntry(i, j) == other.getEntry(i, j);
+			}
+		}
+	}
+	return result;
+}
+
+bool Matrix::operator !=(const Matrix& other)
+{
+	return !(*this == other);
+}
+
+Matrix Matrix::operator+(const Matrix& other)
+{
+	Matrix result;
+	if (this->rowCount() == other.rowCount() && this->columnCount() == other.columnCount())
+	{
+		result = Matrix(*this);
+	}
+}
+
+Matrix Matrix::operator-(const Matrix& other)
+{
+
+}
+
+Matrix Matrix::operator*(const Matrix& other)
+{
+
+}
+
 double Matrix::getEntry(int row, int column) const
 {
 	double result = nan("");
@@ -134,7 +175,7 @@ Matrix Matrix::Identity(int size)
     return matrix;
 }
 
-Matrix Matrix::rowEchelonForm()
+Matrix Matrix::rowEchelonForm() const
 {
 	Matrix result = Matrix(*this);
 	int pivotI = 0;

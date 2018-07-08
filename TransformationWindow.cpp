@@ -17,23 +17,15 @@ TransformationWindow::TransformationWindow
 	_filters.insert("horizontalSobel", ConvolutionalImageFilter::horizontalSobel());
 	_filters.insert("verticalSobel", ConvolutionalImageFilter::verticalSobel());
 	_filters.insert("normalEdge", ConvolutionalImageFilter::edgeDetector());
-	_filters.insert("gaussian", ConvolutionalImageFilter::gaussianFilter(1.0));
+	_filters.insert("gaussian", ConvolutionalImageFilter::gaussianFilter(.82999));
+	_filters.insert("identity", ConvolutionalImageFilter::identity());
+	_filters.insert("sharpen", ConvolutionalImageFilter::sharpen());
 
-	Matrix matrix(2, 2);
-	for (int i = 0; i < matrix.rowCount(); i++)
-	{
-		for (int j = 0; j < matrix.columnCount(); j++)
-		{
-			matrix.setEntry(i, j, 3 * (i * i) + 2 * (j + 1));
-		}
-	}
-
-
-	MatrixTableViewModel* inputModel = new MatrixTableViewModel(&_filters["horizontalSobel"].convolutionMatrix());
+	MatrixTableViewModel* inputModel = new MatrixTableViewModel(_filters["horizontalSobel"].convolutionMatrix());
 	_inputMatrixView->setModel(inputModel);
 
-	Matrix output = matrix.rowEchelonForm();
-	MatrixTableViewModel* outputModel = new MatrixTableViewModel(new Matrix(output));
+	Matrix output = Matrix(inputModel->matrix().rowEchelonForm());
+	MatrixTableViewModel* outputModel = new MatrixTableViewModel(output);
 	_outputMatrixView->setModel(outputModel);
 
 	for (QString key : _filters.keys())

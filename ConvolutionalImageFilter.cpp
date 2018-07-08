@@ -119,6 +119,10 @@ QRgb ConvolutionalImageFilter::convolveImage
 	double greenConvolution = fabs(_convolutionMatrix.convolve(greenMatrix));
 	double blueConvolution = fabs(_convolutionMatrix.convolve(blueMatrix));
 
+	clamp<double>(redConvolution, 0.0, 255.0);
+	clamp<double>(greenConvolution, 0.0, 255.0);
+	clamp<double>(blueConvolution, 0.0, 255.0);
+
 	result = qRgb((int)(redConvolution), (int)(greenConvolution), (int)(blueConvolution));
 	return result;
 }
@@ -194,5 +198,27 @@ ConvolutionalImageFilter ConvolutionalImageFilter::edgeDetector()
 	convolutionalMatrix.setEntry(2, 2, -1);
 	result.setConvolutionMatrix(convolutionalMatrix);
 	return result;
+}
+
+ConvolutionalImageFilter ConvolutionalImageFilter::sharpen()
+{
+	ConvolutionalImageFilter result;
+	Matrix convolutionalMatrx(3,3);
+
+	convolutionalMatrx.setEntry(0, 1, -1);
+
+	convolutionalMatrx.setEntry(1, 0, -1);
+	convolutionalMatrx.setEntry(1, 1, 5);
+	convolutionalMatrx.setEntry(1, 2, -1);
+
+	convolutionalMatrx.setEntry(2, 1, -1);
+
+	result.setConvolutionMatrix(convolutionalMatrx);
+	return result;
+}
+
+ConvolutionalImageFilter ConvolutionalImageFilter::identity()
+{
+	return ConvolutionalImageFilter();
 }
 
