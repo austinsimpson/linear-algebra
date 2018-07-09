@@ -32,7 +32,7 @@ QVariant MatrixTableViewModel::data(const QModelIndex& index, int role) const
 	switch (role)
 	{
 	case Qt::DisplayRole:
-		result = _matrix.getEntry(index.row(), index.column());
+		result = _matrix.value(index.row(), index.column());
 		break;
 	}
 

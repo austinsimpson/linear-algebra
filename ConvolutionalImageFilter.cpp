@@ -27,7 +27,7 @@ bool ConvolutionalImageFilter::setConvolutionMatrix(const Matrix& matrix)
 		{
 			for (int j = 0; j < _convolutionMatrix.columnCount(); j++)
 			{
-				norm += _convolutionMatrix.getEntry(i, j);
+				norm += _convolutionMatrix.value(i, j);
 			}
 		}
 
@@ -109,9 +109,9 @@ QRgb ConvolutionalImageFilter::convolveImage
 			int matrixRowIndex = y - lowerRowBound;
 			int matrixColumnIndex = x - lowerColumnBound;
 
-			redMatrix.setEntry(matrixRowIndex, matrixColumnIndex, (double)qRed(currentPixel));
-			greenMatrix.setEntry(matrixRowIndex, matrixColumnIndex, (double)qGreen(currentPixel));
-			blueMatrix.setEntry(matrixRowIndex, matrixColumnIndex, (double)qBlue(currentPixel));
+			redMatrix.setValue(matrixRowIndex, matrixColumnIndex, (double)qRed(currentPixel));
+			greenMatrix.setValue(matrixRowIndex, matrixColumnIndex, (double)qGreen(currentPixel));
+			blueMatrix.setValue(matrixRowIndex, matrixColumnIndex, (double)qBlue(currentPixel));
 		}
 	}
 
@@ -132,13 +132,13 @@ ConvolutionalImageFilter ConvolutionalImageFilter::horizontalSobel()
 	ConvolutionalImageFilter result;
 	result.setShouldApplyGrayscale(true);
 	Matrix convolutionalMatrix(3, 3);
-	convolutionalMatrix.setEntry(0, 0, 1);
-	convolutionalMatrix.setEntry(0, 1, 2);
-	convolutionalMatrix.setEntry(0, 2, 1);
+	convolutionalMatrix.setValue(0, 0, 1);
+	convolutionalMatrix.setValue(0, 1, 2);
+	convolutionalMatrix.setValue(0, 2, 1);
 
-	convolutionalMatrix.setEntry(2, 0, -1);
-	convolutionalMatrix.setEntry(2, 1, -2);
-	convolutionalMatrix.setEntry(2, 2, -1);
+	convolutionalMatrix.setValue(2, 0, -1);
+	convolutionalMatrix.setValue(2, 1, -2);
+	convolutionalMatrix.setValue(2, 2, -1);
 	result.setConvolutionMatrix(convolutionalMatrix);
 
 	return result;
@@ -149,13 +149,13 @@ ConvolutionalImageFilter ConvolutionalImageFilter::verticalSobel()
 	ConvolutionalImageFilter result;
 	result.setShouldApplyGrayscale(true);
 	Matrix convolutionalMatrix(3, 3);
-	convolutionalMatrix.setEntry(0, 0, -1);
-	convolutionalMatrix.setEntry(1, 0, -2);
-	convolutionalMatrix.setEntry(2, 0, -1);
+	convolutionalMatrix.setValue(0, 0, -1);
+	convolutionalMatrix.setValue(1, 0, -2);
+	convolutionalMatrix.setValue(2, 0, -1);
 
-	convolutionalMatrix.setEntry(0, 2, 1);
-	convolutionalMatrix.setEntry(1, 2, 2);
-	convolutionalMatrix.setEntry(2, 2, 1);
+	convolutionalMatrix.setValue(0, 2, 1);
+	convolutionalMatrix.setValue(1, 2, 2);
+	convolutionalMatrix.setValue(2, 2, 1);
 	result.setConvolutionMatrix(convolutionalMatrix);
 	return result;
 }
@@ -171,7 +171,7 @@ ConvolutionalImageFilter ConvolutionalImageFilter::gaussianFilter(double sigma)
 	{
 		for (int j = 0; j < convolutionalMatrix.columnCount(); j++)
 		{
-			convolutionalMatrix.setEntry(i, j, gaussian(sigma, i, j));
+			convolutionalMatrix.setValue(i, j, gaussian(sigma, i, j));
 		}
 	}
 
@@ -185,17 +185,17 @@ ConvolutionalImageFilter ConvolutionalImageFilter::edgeDetector()
 	result.setShouldApplyGrayscale(true);
 
 	Matrix convolutionalMatrix(3, 3);
-	convolutionalMatrix.setEntry(0, 0, -1);
-	convolutionalMatrix.setEntry(0, 1, -1);
-	convolutionalMatrix.setEntry(0, 2, -1);
+	convolutionalMatrix.setValue(0, 0, -1);
+	convolutionalMatrix.setValue(0, 1, -1);
+	convolutionalMatrix.setValue(0, 2, -1);
 
-	convolutionalMatrix.setEntry(1, 0, -1);
-	convolutionalMatrix.setEntry(1, 1, 8);
-	convolutionalMatrix.setEntry(1, 2, -1);
+	convolutionalMatrix.setValue(1, 0, -1);
+	convolutionalMatrix.setValue(1, 1, 8);
+	convolutionalMatrix.setValue(1, 2, -1);
 
-	convolutionalMatrix.setEntry(2, 0, -1);
-	convolutionalMatrix.setEntry(2, 1, -1);
-	convolutionalMatrix.setEntry(2, 2, -1);
+	convolutionalMatrix.setValue(2, 0, -1);
+	convolutionalMatrix.setValue(2, 1, -1);
+	convolutionalMatrix.setValue(2, 2, -1);
 	result.setConvolutionMatrix(convolutionalMatrix);
 	return result;
 }
@@ -205,13 +205,13 @@ ConvolutionalImageFilter ConvolutionalImageFilter::sharpen()
 	ConvolutionalImageFilter result;
 	Matrix convolutionalMatrx(3,3);
 
-	convolutionalMatrx.setEntry(0, 1, -1);
+	convolutionalMatrx.setValue(0, 1, -1);
 
-	convolutionalMatrx.setEntry(1, 0, -1);
-	convolutionalMatrx.setEntry(1, 1, 5);
-	convolutionalMatrx.setEntry(1, 2, -1);
+	convolutionalMatrx.setValue(1, 0, -1);
+	convolutionalMatrx.setValue(1, 1, 5);
+	convolutionalMatrx.setValue(1, 2, -1);
 
-	convolutionalMatrx.setEntry(2, 1, -1);
+	convolutionalMatrx.setValue(2, 1, -1);
 
 	result.setConvolutionMatrix(convolutionalMatrx);
 	return result;

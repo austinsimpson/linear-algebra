@@ -24,9 +24,9 @@ TransformationWindow::TransformationWindow
 	MatrixTableViewModel* inputModel = new MatrixTableViewModel(_filters["horizontalSobel"].convolutionMatrix());
 	_inputMatrixView->setModel(inputModel);
 
-	Matrix output = Matrix(inputModel->matrix().rowEchelonForm());
-	MatrixTableViewModel* outputModel = new MatrixTableViewModel(output);
-	_outputMatrixView->setModel(outputModel);
+	//Matrix output = Matrix(inputModel->matrix().rowEchelonForm());
+	//MatrixTableViewModel* outputModel = new MatrixTableViewModel(output);
+	//_outputMatrixView->setModel(outputModel);
 
 	for (QString key : _filters.keys())
 	{

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QSharedPointer>
 
+#include <math.h>
+
 class MatrixData : public QSharedData
 {
 public:
@@ -11,6 +13,7 @@ public:
 	{
 		_rowCount = 0;
 		_columnCount = 0;
+		_matrixValues = nullptr;
 	}
 
 	MatrixData(int rowCount, int columnCount)
@@ -18,6 +21,20 @@ public:
 		int elementCount = rowCount * columnCount;
 		_matrixValues = new double[elementCount];
 		memset(_matrixValues, 0, sizeof(double) * elementCount);
+		_rowCount = rowCount;
+		_columnCount = columnCount;
+	}
+
+	MatrixData(const MatrixData& other) : QSharedData(other), _matrixValues(other._matrixValues), _rowCount(other.rowCount()), _columnCount(other.columnCount())
+	{
+
+	}
+
+	MatrixData* clone()
+	{
+		MatrixData* result = new MatrixData(rowCount(), columnCount());
+		memcpy(result->_matrixValues, _matrixValues, sizeof(double) * rowCount() * columnCount());
+		return result;
 	}
 
 	~MatrixData()
@@ -26,6 +43,34 @@ public:
 		{
 			delete[] _matrixValues;
 		}
+	}
+
+	inline double value(int row, int column) const
+	{
+		double result = nan("");
+		if (0 <= row && row < _rowCount && 0 <= column && column < _columnCount)
+		{
+			result = _matrixValues[row * columnCount() + column];
+		}
+		return result;
+	}
+
+	inline void setValue(int row, int column, double value)
+	{
+		if (0 <= row && row < _rowCount && 0 <= column && column < _columnCount)
+		{
+			_matrixValues[row * _columnCount + column] = value;
+		}
+	}
+
+	inline int rowCount() const
+	{
+		return _rowCount;
+	}
+
+	inline int columnCount() const
+	{
+		return _columnCount;
 	}
 
 private:
@@ -43,7 +88,7 @@ public:
 
 	~Matrix();
 
-	Matrix& operator= (Matrix other);
+	Matrix& operator= (const Matrix& other);
 	bool operator == (const Matrix& other);
 	bool operator != (const Matrix& other);
 
@@ -51,11 +96,18 @@ public:
 	Matrix operator-(const Matrix& other);
 	Matrix operator*(const Matrix& other);
 
-    double getEntry(int row, int column) const;
-    void setEntry(int row, int column, double value);
+	double value(int row, int column) const;
+	void setValue(int row, int column, double value);
 
-    int rowCount() const;
-    int columnCount() const;
+	inline int rowCount() const
+	{
+		return _matrixData.data()->rowCount();
+	}
+
+	int columnCount() const
+	{
+		return _matrixData.data()->columnCount();
+	}
 
 	bool isReducedRowEchelonForm() const;
 
@@ -82,10 +134,13 @@ private:
 	void swapRows(int first, int second);
 	void pivot(int pivotRow, int targetRow, double scalar);
 
-    int _rowCount;
-    int _columnCount;
-
-	QSharedPointer<double> _values;
+	QSharedDataPointer<MatrixData> _matrixData;
 };
+
+template <>
+inline MatrixData* QSharedDataPointer<MatrixData>::clone()
+{
+	return d->clone();
+}
 
 #endif // MATRIX_H

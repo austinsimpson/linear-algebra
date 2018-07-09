@@ -14,18 +14,18 @@ TransformWidget::TransformWidget
 	_geometryMatrix(3, 3)
 
 {
-	_transformationMatrix.setEntry(0, 0, 2);
-	_transformationMatrix.setEntry(1, 1, 10);
-	_transformationMatrix.setEntry(0, 2, 100);
-	_transformationMatrix.setEntry(1, 2, 40);
+	_transformationMatrix.setValue(0, 0, 2);
+	_transformationMatrix.setValue(1, 1, 10);
+	_transformationMatrix.setValue(0, 2, 100);
+	_transformationMatrix.setValue(1, 2, 40);
 
-	_geometryMatrix.setEntry(1, 1, 10);
-	_geometryMatrix.setEntry(0, 2, 10);
-	_geometryMatrix.setEntry(1, 2, 5);
+	_geometryMatrix.setValue(1, 1, 10);
+	_geometryMatrix.setValue(0, 2, 10);
+	_geometryMatrix.setValue(1, 2, 5);
 
 	for (int i = 0 ; i < 3; i++)
 	{
-		_geometryMatrix.setEntry(2, i, 1);
+		_geometryMatrix.setValue(2, i, 1);
 	}
 
 	_updateTimer.setInterval(1000/60);
@@ -58,7 +58,7 @@ void TransformWidget::paintEvent
 	Matrix transformedGeometry = _transformationMatrix.multiply(_geometryMatrix);
 	for (int i = 0; i < transformedGeometry.columnCount(); i++)
 	{
-		painter.drawPoint(transformedGeometry.getEntry(0, i), transformedGeometry.getEntry(1, i));
+		painter.drawPoint(transformedGeometry.value(0, i), transformedGeometry.value(1, i));
 	}
 
 	pen.setColor(QColor("Blue"));
@@ -66,7 +66,7 @@ void TransformWidget::paintEvent
 
 	for (int i = 0; i < _geometryMatrix.columnCount(); i++)
 	{
-		painter.drawPoint(_geometryMatrix.getEntry(0, i), _geometryMatrix.getEntry(1, i));
+		painter.drawPoint(_geometryMatrix.value(0, i), _geometryMatrix.value(1, i));
 	}
 }
 
@@ -90,25 +90,25 @@ void TransformWidget::UpdateTransformation()
 	double sinTheta = sin(theta); //Precompute trig values cause it's expensive
 	double cosTheta = cos(theta); //Precompute trig values cause it's expensive
 
-	_transformationMatrix.setEntry(0, 0, cosTheta);
-	_transformationMatrix.setEntry(1, 0, -sinTheta);
-	_transformationMatrix.setEntry(0, 1, sinTheta);
-	_transformationMatrix.setEntry(1, 1, cosTheta);
+	_transformationMatrix.setValue(0, 0, cosTheta);
+	_transformationMatrix.setValue(1, 0, -sinTheta);
+	_transformationMatrix.setValue(0, 1, sinTheta);
+	_transformationMatrix.setValue(1, 1, cosTheta);
 
 	static double xVelocity = 1.4 * cosTheta;
 	static double yVelocity = 1.4 * sinTheta;
 
-	double translationX = _transformationMatrix.getEntry(0, 2);
-	double translationY = _transformationMatrix.getEntry(1, 2);
+	double translationX = _transformationMatrix.value(0, 2);
+	double translationY = _transformationMatrix.value(1, 2);
 
 	if (10 > translationX || translationX > 500)
 	{
-		_transformationMatrix.setEntry(0, 0, (-1 * _transformationMatrix.getEntry(0, 0)));
+		_transformationMatrix.setValue(0, 0, (-1 * _transformationMatrix.value(0, 0)));
 		xVelocity *= -1;
 	}
 
-	_transformationMatrix.setEntry(0, 2, translationX + xVelocity);
-	_transformationMatrix.setEntry(1, 2, translationY + yVelocity);
+	_transformationMatrix.setValue(0, 2, translationX + xVelocity);
+	_transformationMatrix.setValue(1, 2, translationY + yVelocity);
 	theta += dTheta;
 	update();
 }
