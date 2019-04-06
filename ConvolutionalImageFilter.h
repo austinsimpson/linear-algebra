@@ -21,12 +21,13 @@ public:
 	static ConvolutionalImageFilter horizontalSobel();
 	static ConvolutionalImageFilter verticalSobel();
 	static ConvolutionalImageFilter edgeDetector();
+	static ConvolutionalImageFilter boxBlur();
 	static ConvolutionalImageFilter gaussianFilter(double sigma);
 	static ConvolutionalImageFilter sharpen();
 	static ConvolutionalImageFilter identity();
 
 private:
-	QRgb convolveImage(const QImage& image, int pixelX, int pixelY);
+	QRgb convolveImagePixel(const Matrix& redMatrix, const Matrix& greenMatrix, const Matrix& blueMatrix, int pixelX, int pixelY);
 
 	Matrix _convolutionMatrix;
 	bool _shouldApplyGrayscale;

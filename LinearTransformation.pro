@@ -31,7 +31,13 @@ SOURCES += \
     TransformWidget.cpp \
     Algebra.cpp \
     Fraction.cpp \
-    ConvolutionalImageFilter.cpp
+    ConvolutionalImageFilter.cpp \
+    ConvolveImageLineTask.cpp \
+    MatrixRef.cpp \
+    NeuralNetwork.cpp \
+    LatexMatrixSerializer.cpp \
+    ComplexNumber.cpp \
+    ColorWheelGraphWidget.cpp
 
 HEADERS += \
         TransformationWindow.h \
@@ -40,7 +46,15 @@ HEADERS += \
     TransformWidget.h \
     Algebra.h \
     Fraction.h \
-    ConvolutionalImageFilter.h
+    ConvolutionalImageFilter.h \
+    ConvolveImageLineTask.h \
+    MatrixRef.h \
+    NeuralNetwork.h \
+    IMatrixSerializer.h \
+    LatexMatrixSerializer.h \
+    ComplexNumber.h \
+    ElementaryComplexFunctions.h \
+    ColorWheelGraphWidget.h
 
 FORMS += \
         TransformationWindow.ui

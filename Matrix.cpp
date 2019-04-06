@@ -229,7 +229,7 @@ void Matrix::scaleRow
 	}
 }
 
-double Matrix::convolve(const Matrix& other)
+double Matrix::convolve(const Matrix& other) const
 {
 	double result = 0;
 
@@ -237,7 +237,7 @@ double Matrix::convolve(const Matrix& other)
 	{
 		for (int j = 0; j < columnCount(); j++)
 		{
-			result += this->value(i, j) * other.value(i, j);
+			result += this->value(i, j) * other.value(other.rowCount() - i - 1, other.columnCount() - j - 1);
 		}
 	}
 

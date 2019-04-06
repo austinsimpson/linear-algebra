@@ -21,6 +21,8 @@ private slots:
 
 	void on__selectedFilterComboBox_currentIndexChanged(const QString& currentIndex);
 
+	void on__actionSave_Matrix_triggered();
+
 private:
     Ui::TransformationWindow *ui;
 

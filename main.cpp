@@ -2,12 +2,10 @@
 #include <QApplication>
 #include <QDebug>
 
-#include <QTableView>
-
-#include "Matrix.h"
-#include "MatrixTableViewModel.h"
-
 #include <QtMacExtras>
+
+#include "ComplexNumber.h"
+#include "ElementaryComplexFunctions.h"
 
 int main(int argc, char *argv[])
 {

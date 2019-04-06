@@ -30,7 +30,7 @@ TransformWidget::TransformWidget
 
 	_updateTimer.setInterval(1000/60);
 	connect(&_updateTimer, &QTimer::timeout, this, &TransformWidget::UpdateTransformation);
-	//_updateTimer.start();
+	_updateTimer.start();
 }
 
 TransformWidget::~TransformWidget()

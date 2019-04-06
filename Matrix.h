@@ -114,9 +114,8 @@ public:
 	Matrix multiply(const Matrix& other);
 	void scale(double factor);
 
-	double convolve(const Matrix& other);
+	double convolve(const Matrix& other) const;
 
-	Matrix transpose();
 
 	static Matrix Identity(int size);
 
@@ -124,6 +123,7 @@ public:
 	Matrix reducedRowEchelonForm();
 
     QString toString();
+	Matrix transpose();
 
 signals:
 

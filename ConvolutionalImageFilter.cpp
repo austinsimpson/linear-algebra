@@ -5,6 +5,11 @@
 #include <QDebug>
 #include <math.h>
 
+#include "MatrixRef.h"
+#include "ConvolveImageLineTask.h"
+
+#include <QThreadPool>
+
 ConvolutionalImageFilter::ConvolutionalImageFilter() : _shouldApplyGrayscale(false)
 {
 	_convolutionMatrix = Matrix::Identity(1);
@@ -54,70 +59,66 @@ QImage ConvolutionalImageFilter::apply(const QImage& image)
 	QImage result;
 	if (_shouldApplyGrayscale == false)
 	{
-		result = QImage(image.size(), QImage::Format_RGB888);
+		result = QImage(image.size(), QImage::Format_RGB32);
 	}
 	else
 	{
 		result = QImage(image.size(), QImage::Format_Grayscale8);
 	}
 
-	for (int row = 0; row < image.height(); row++)
+	Matrix redMatrix(image.height(), image.width());
+	Matrix greenMatrix(image.height(), image.width());
+	Matrix blueMatrix(image.height(), image.width());
+
+	const QRgb* imageData = (QRgb*) image.constBits();
+	int imageWidth = image.width();
+	int imageHeight = image.height();
+	for (int i = 0; i < imageWidth; i++)
 	{
-		for (int column = 0; column < image.width(); column++)
+		for (int j = 0; j < imageHeight; j++)
 		{
-			result.setPixel(column, row, convolveImage(image, column, row));
+			redMatrix.setValue(j, i, qRed(imageData[i + (j * imageWidth)]));
+			greenMatrix.setValue(j, i, qGreen(imageData[i + (j * imageWidth)]));
+			blueMatrix.setValue(j, i, qBlue(imageData[i + (j * imageWidth)]));
 		}
 	}
+
+	for (int line = 0; line < redMatrix.rowCount(); line++)
+	{
+		QThreadPool::globalInstance()->start(new ConvolveImageLineTask(line, _convolutionMatrix, redMatrix, greenMatrix, blueMatrix, result));
+	}
+
+	QThreadPool::globalInstance()->waitForDone();
 
 	result.save("/Users/AustinSimpson/Desktop/convolution.bmp");
 
 	return result;
 }
 
-QRgb ConvolutionalImageFilter::convolveImage
+QRgb ConvolutionalImageFilter::convolveImagePixel
 (
-	const QImage& image,
+	const Matrix& redMatrix,
+	const Matrix& greenMatrix,
+	const Matrix& blueMatrix,
 	int pixelX,
 	int pixelY
 )
 {
 	QRgb result;
 
-	int lowerColumnBound = (pixelX - ((_convolutionMatrix.columnCount() - 1) / 2));
-	int upperColumnBound = (pixelX + ((_convolutionMatrix.columnCount() - 1) / 2));
+	int halfWidth = ((_convolutionMatrix.columnCount() - 1) / 2);
+	int halfHeight = ((_convolutionMatrix.rowCount() - 1) / 2);
 
-	int lowerRowBound = (pixelY - (_convolutionMatrix.rowCount() - 1) / 2);
-	int upperRowBound = (pixelY + (_convolutionMatrix.rowCount() - 1) / 2);
+	int lowerColumnBound = pixelX - halfWidth;
+	int lowerRowBound = pixelY - halfHeight;
 
-	Matrix redMatrix(_convolutionMatrix.rowCount(), _convolutionMatrix.columnCount());
-	Matrix greenMatrix(_convolutionMatrix.rowCount(), _convolutionMatrix.columnCount());
-	Matrix blueMatrix(_convolutionMatrix.rowCount(), _convolutionMatrix.columnCount());
+	MatrixRef redSubmatrix(redMatrix, lowerRowBound, lowerColumnBound, _convolutionMatrix.rowCount(), _convolutionMatrix.columnCount());
+	MatrixRef greenSubmatrix(greenMatrix, lowerRowBound, lowerColumnBound, _convolutionMatrix.rowCount(), _convolutionMatrix.columnCount());
+	MatrixRef blueSubmatrix(blueMatrix, lowerRowBound, lowerColumnBound, _convolutionMatrix.rowCount(), _convolutionMatrix.columnCount());
 
-	for (int x = lowerColumnBound; x <= upperColumnBound; x++)
-	{
-		for (int y = lowerRowBound; y <= upperRowBound; y++)
-		{
-			int usedX = x;
-			int usedY = y;
-			if (usedX < 0) usedX = 0;
-			if (usedX >= image.width()) usedX = image.width() - 1;
-			if (usedY < 0) usedY = 0;
-			if (usedY >= image.height()) usedY = image.height() - 1;
-
-			QRgb currentPixel = image.pixel(usedX, usedY);
-
-			int matrixRowIndex = y - lowerRowBound;
-			int matrixColumnIndex = x - lowerColumnBound;
-
-			redMatrix.setValue(matrixRowIndex, matrixColumnIndex, (double)qRed(currentPixel));
-			greenMatrix.setValue(matrixRowIndex, matrixColumnIndex, (double)qGreen(currentPixel));
-			blueMatrix.setValue(matrixRowIndex, matrixColumnIndex, (double)qBlue(currentPixel));
-		}
-	}
-
-	double redConvolution = fabs(_convolutionMatrix.convolve(redMatrix));
-	double greenConvolution = fabs(_convolutionMatrix.convolve(greenMatrix));
-	double blueConvolution = fabs(_convolutionMatrix.convolve(blueMatrix));
+	double redConvolution = fabs(redSubmatrix.convolve(_convolutionMatrix));
+	double greenConvolution = fabs(greenSubmatrix.convolve(_convolutionMatrix));
+	double blueConvolution = fabs(blueSubmatrix.convolve(_convolutionMatrix));
 
 	clamp<double>(redConvolution, 0.0, 255.0);
 	clamp<double>(greenConvolution, 0.0, 255.0);
@@ -174,6 +175,25 @@ ConvolutionalImageFilter ConvolutionalImageFilter::gaussianFilter(double sigma)
 			convolutionalMatrix.setValue(i, j, gaussian(sigma, i, j));
 		}
 	}
+
+	result.setConvolutionMatrix(convolutionalMatrix);
+	return result;
+}
+
+ConvolutionalImageFilter ConvolutionalImageFilter::boxBlur()
+{
+	ConvolutionalImageFilter result;
+
+	Matrix convolutionalMatrix(3,3);
+	convolutionalMatrix.setValue(0, 0, 1.0);
+	convolutionalMatrix.setValue(0, 1, 1.0);
+	convolutionalMatrix.setValue(0, 2, 1.0);
+	convolutionalMatrix.setValue(1, 0, 1.0);
+	convolutionalMatrix.setValue(1, 1, 1.0);
+	convolutionalMatrix.setValue(1, 2, 1.0);
+	convolutionalMatrix.setValue(2, 0, 1.0);
+	convolutionalMatrix.setValue(2, 1, 1.0);
+	convolutionalMatrix.setValue(2, 2, 1.0);
 
 	result.setConvolutionMatrix(convolutionalMatrix);
 	return result;
