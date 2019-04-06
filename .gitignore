@@ -3,3 +3,10 @@
 ################################################################################
 
 /debug
+/.vs
+/release/moc_predefs.h.cbt
+/.qmake.stash
+/LinearTransformation.pro.user
+/LinearTransformation.vcxproj.filters
+/LinearTransformation.vcxproj.user
+/ui_TransformationWindow.h
