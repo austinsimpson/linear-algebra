@@ -5,6 +5,7 @@
 #include <QSharedPointer>
 
 #include <math.h>
+#include <functional>
 
 class MatrixData : public QSharedData
 {
@@ -21,6 +22,13 @@ public:
 		int elementCount = rowCount * columnCount;
 		_matrixValues = new double[elementCount];
 		memset(_matrixValues, 0, sizeof(double) * elementCount);
+		_rowCount = rowCount;
+		_columnCount = columnCount;
+	}
+
+	MatrixData(int rowCount, int columnCount, double* data)
+	{
+		_matrixValues = data;
 		_rowCount = rowCount;
 		_columnCount = columnCount;
 	}
@@ -73,6 +81,11 @@ public:
 		return _columnCount;
 	}
 
+	inline double* data() const
+	{
+		return _matrixValues;
+	}
+
 private:
 	double* _matrixValues;
 	int _rowCount;
@@ -85,6 +98,8 @@ public:
 	Matrix();
 	Matrix(int rowCount, int columnCount);
 	Matrix(const Matrix& other);
+	Matrix(int rowCount, int columnCount, double* data);
+	Matrix(int rowCount, int columnCount, std::function<double(int, int)> function);
 
 	~Matrix();
 
@@ -95,6 +110,8 @@ public:
 	Matrix operator+(const Matrix& other);
 	Matrix operator-(const Matrix& other);
 	Matrix operator*(const Matrix& other);
+
+	double* getData() const { return _matrixData->data(); }
 
 	double value(int row, int column) const;
 	void setValue(int row, int column, double value);

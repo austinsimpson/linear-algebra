@@ -1,5 +1,4 @@
 #include "ColorWheelGraphWidget.h"
-
 #include "ElementaryComplexFunctions.h"
 
 #include <QColor>
@@ -13,8 +12,8 @@ ColorWheelGraphWidget::ColorWheelGraphWidget
 	QWidget(parent),
 	_alpha(30),
 	_radiusAffectsBrightness(true),
-	_numberOfRealSamples(500),
-	_numberOfImaginarySamples(500),
+	_numberOfRealSamples(1920),
+	_numberOfImaginarySamples(1080),
 	_windowLeft(-M_PI),
 	_windowRight(M_PI),
 	_windowBottom(-M_PI),

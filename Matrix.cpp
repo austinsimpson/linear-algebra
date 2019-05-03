@@ -27,6 +27,34 @@ Matrix::Matrix(const Matrix& other)
 	_matrixData = other._matrixData;
 }
 
+Matrix::Matrix
+(
+	int rowCount,
+	int columnCount,
+	double* data
+)
+{
+	_matrixData = new MatrixData(rowCount, columnCount, data);
+}
+
+Matrix::Matrix
+(
+	int rowCount, 
+	int columnCount, 
+	std::function<double(int, int)> function
+): 
+	Matrix(rowCount, columnCount)
+{
+	for (int i = 0; i < rowCount; i++)
+	{
+		for (int j = 0; j < columnCount; j++)
+		{
+			setValue(i, j, function(i, j));
+		}
+	}
+}
+
+
 Matrix::~Matrix()
 {
 }
@@ -84,7 +112,7 @@ Matrix Matrix::operator-(const Matrix& other)
 
 Matrix Matrix::operator*(const Matrix& other)
 {
-	return Matrix();
+	return multiply(other);
 }
 
 double Matrix::value(int row, int column) const

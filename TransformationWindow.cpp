@@ -9,6 +9,8 @@
 #include "ComplexNumber.h"
 #include "ElementaryComplexFunctions.h"
 
+#include "CudaMatrixOperations.h"
+
 TransformationWindow::TransformationWindow
 (
     QWidget* parent
@@ -26,7 +28,28 @@ TransformationWindow::TransformationWindow
 	_filters.insert("identity", ConvolutionalImageFilter::identity());
 	_filters.insert("sharpen", ConvolutionalImageFilter::sharpen());
 
-	MatrixTableViewModel* inputModel = new MatrixTableViewModel(_filters["horizontalSobel"].convolutionMatrix());
+	Matrix a(512, 512, [](int row, int column) {return (row + 1) + (column + 1); });
+	Matrix b(512, 512, [](int row, int column) {return row == column ? 1 : 0; });
+
+	CudaMatrix aCopy;
+	aCopy._data = a.getData();
+	aCopy._dimension = 512;
+	CudaMatrix bCopy;
+	bCopy._data = b.getData();
+	bCopy._dimension = 512;
+
+	CudaMatrix rawResult = multiplyMatricesWithCuda(aCopy, bCopy);
+	Matrix result(rawResult._dimension, rawResult._dimension, rawResult._data);
+	if (result == a * b)
+	{
+		int i = 0;
+	}
+	else
+	{
+		int j = 1;
+	}
+
+	MatrixTableViewModel* inputModel = new MatrixTableViewModel(result);
 	_inputMatrixView->setModel(inputModel);
 
 	Matrix output = Matrix(inputModel->matrix().rowEchelonForm());
@@ -42,7 +65,7 @@ TransformationWindow::TransformationWindow
 	connect(_radiusAffectsBrightnessCheckBox, &QCheckBox::toggled, _complexGraphWidget, &ColorWheelGraphWidget::setRadiusAffectsBrightness);
 	connect(_radiusAffectsBrightnessCheckBox, &QCheckBox::toggled,[this](bool b){ _alphaSlider->setEnabled(b);});
 
-	_complexGraphWidget->setFunction([](const ComplexNumber& z){ return ((z+1)^(1.0/2))*((z-1)^(1.0/2));});
+	_complexGraphWidget->setFunction([](const ComplexNumber& z) { return ((complexExp(ComplexNumber::i() * 3 * z) - complexExp(ComplexNumber::i() * 5 * z))*((z*z).inverse())).real(); });
 }
 
 TransformationWindow::~TransformationWindow()
