@@ -11,3 +11,6 @@
 /LinearTransformation.vcxproj.user
 /ui_TransformationWindow.h
 /x64/Debug
+/GPUAcceleration/x64/Debug
+/GPUAcceleration/GPUAcceleration.vcxproj.user
+/linear-algebra/x64/debug/CudaMatrixOperations.cu.obj

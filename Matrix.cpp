@@ -3,6 +3,10 @@
 #include <QStringBuilder>
 #include <math.h>
 
+#ifdef USE_CUDA
+#include "CudaMatrixOperations.h"
+#endif
+
 Matrix::Matrix()
 {
 	_matrixData = new MatrixData();
@@ -93,13 +97,20 @@ bool Matrix::operator !=(const Matrix& other)
 {
 	return !(*this == other);
 }
-
+ 
 Matrix Matrix::operator+(const Matrix& other)
 {
 	Matrix result;
 	if (this->rowCount() == other.rowCount() && this->columnCount() == other.columnCount())
 	{
-		result = Matrix(*this);
+#ifdef USE_CUDA
+		CudaMatrix firstMatrix = matrixToCudaMatrix(*this);
+		CudaMatrix secondMatrix = matrixToCudaMatrix(other);
+		CudaMatrix cudaResult = addMatricesWithCuda(firstMatrix, secondMatrix);
+		result = Matrix(cudaResult.rowCount, cudaResult.columnCount, cudaResult.data);
+#else
+		result = Matrix(rowCount(), columnCount(), [this, other](int row, int column) { return value(row, column) + other.value(row, column); });
+#endif
 	}
 
 	return result;
@@ -107,7 +118,19 @@ Matrix Matrix::operator+(const Matrix& other)
 
 Matrix Matrix::operator-(const Matrix& other)
 {
-	return Matrix();
+	Matrix result;
+	if (this->rowCount() == other.rowCount() && this->columnCount() == other.columnCount())
+	{
+#ifdef USE_CUDA
+		CudaMatrix firstMatrix = matrixToCudaMatrix(*this);
+		CudaMatrix secondMatrix = matrixToCudaMatrix(other);
+		CudaMatrix cudaResult = subtractMatricesWithCuda(firstMatrix, secondMatrix);
+		result = Matrix(cudaResult.rowCount, cudaResult.columnCount, cudaResult.data);
+#else
+		result = Matrix(rowCount(), columnCount(), [this, other](int row, int column) { return value(row, column) - other.value(row, column); });
+#endif 
+	}
+	return result; 
 }
 
 Matrix Matrix::operator*(const Matrix& other)
@@ -135,6 +158,12 @@ Matrix Matrix::multiply(const Matrix& otherMatrix)
 	Matrix result = Matrix();
     if (columnCount() == otherMatrix.rowCount())
     {
+#ifdef USE_CUDA
+		CudaMatrix first = matrixToCudaMatrix(*this);
+		CudaMatrix second = matrixToCudaMatrix(otherMatrix);
+		CudaMatrix cudaResult = multiplyMatricesWithCuda(first, second);
+		result = Matrix(cudaResult.rowCount, cudaResult.columnCount, cudaResult.data);
+#else
 		result = Matrix(rowCount(), otherMatrix.columnCount());
         for (int row = 0; row < rowCount(); row++)
         {
@@ -148,6 +177,7 @@ Matrix Matrix::multiply(const Matrix& otherMatrix)
 				result.setValue(row, column, sum);
             }
         }
+#endif
     }
     return result;
 }
@@ -305,3 +335,15 @@ void Matrix::pivot
 		}
 	}
 }
+
+
+#ifdef USE_CUDA
+CudaMatrix matrixToCudaMatrix(const Matrix& matrix) 
+{
+	CudaMatrix result;
+	result.data = const_cast<double*>(matrix.getData());
+	result.rowCount = matrix.rowCount();
+	result.columnCount = matrix.columnCount();
+	return result;
+}
+#endif

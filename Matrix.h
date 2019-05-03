@@ -111,7 +111,7 @@ public:
 	Matrix operator-(const Matrix& other);
 	Matrix operator*(const Matrix& other);
 
-	double* getData() const { return _matrixData->data(); }
+	const double* getData() const { return _matrixData->data(); }
 
 	double value(int row, int column) const;
 	void setValue(int row, int column, double value);
@@ -159,5 +159,12 @@ inline MatrixData* QSharedDataPointer<MatrixData>::clone()
 {
 	return d->clone();
 }
+
+
+#ifdef USE_CUDA
+struct CudaMatrix;
+CudaMatrix matrixToCudaMatrix(const Matrix& matrix);
+#endif
+
 
 #endif // MATRIX_H

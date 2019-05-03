@@ -100,7 +100,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;C:\Qt\5.12.2\msvc2017_64\include;C:\Qt\5.12.2\msvc2017_64\include\QtWidgets;C:\Qt\5.12.2\msvc2017_64\include\QtGui;C:\Qt\5.12.2\msvc2017_64\include\QtANGLE;C:\Qt\5.12.2\msvc2017_64\include\QtCore;debug;C:\VulkanSDK\1.0.51.0\include;C:\Qt\5.12.2\msvc2017_64\mkspecs\win32-msvc;..\GPUAcceleration;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;C:\Qt\5.12.2\msvc2017_64\include;C:\Qt\5.12.2\msvc2017_64\include\QtWidgets;C:\Qt\5.12.2\msvc2017_64\include\QtGui;C:\Qt\5.12.2\msvc2017_64\include\QtANGLE;C:\Qt\5.12.2\msvc2017_64\include\QtCore;debug;C:\VulkanSDK\1.0.51.0\include;C:\Qt\5.12.2\msvc2017_64\mkspecs\win32-msvc;GPUAcceleration;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>debug\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -109,7 +109,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>debug\</ObjectFileName>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DEPRECATED_WARNINGS;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DEPRECATED_WARNINGS;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_USE_MATH_DEFINES;USE_CUDA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <SuppressStartupBanner>true</SuppressStartupBanner>

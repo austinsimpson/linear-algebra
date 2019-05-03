@@ -28,28 +28,10 @@ TransformationWindow::TransformationWindow
 	_filters.insert("identity", ConvolutionalImageFilter::identity());
 	_filters.insert("sharpen", ConvolutionalImageFilter::sharpen());
 
-	Matrix a(512, 512, [](int row, int column) {return (row + 1) + (column + 1); });
-	Matrix b(512, 512, [](int row, int column) {return row == column ? 1 : 0; });
+	Matrix a(100, 100, [](int row, int column) {return 1; });
+	Matrix b(100, 100, [](int row, int column) {return 1; });
 
-	CudaMatrix aCopy;
-	aCopy._data = a.getData();
-	aCopy._dimension = 512;
-	CudaMatrix bCopy;
-	bCopy._data = b.getData();
-	bCopy._dimension = 512;
-
-	CudaMatrix rawResult = multiplyMatricesWithCuda(aCopy, bCopy);
-	Matrix result(rawResult._dimension, rawResult._dimension, rawResult._data);
-	if (result == a * b)
-	{
-		int i = 0;
-	}
-	else
-	{
-		int j = 1;
-	}
-
-	MatrixTableViewModel* inputModel = new MatrixTableViewModel(result);
+	MatrixTableViewModel* inputModel = new MatrixTableViewModel(a-b);
 	_inputMatrixView->setModel(inputModel);
 
 	Matrix output = Matrix(inputModel->matrix().rowEchelonForm());
